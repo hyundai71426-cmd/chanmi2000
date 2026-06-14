@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>찬미예수 2000 악보 검색</title>
+<style>
+  :root {
+    --bg: #f8f5f0;
+    --card: #ffffff;
+    --accent: #5b3c88;
+    --accent-light: #7e55b0;
+    --text: #2d2d2d;
+    --sub: #6b6b6b;
+    --border: #e0d9f0;
+    --hover: #f0ebfa;
+    --shadow: 0 2px 12px rgba(91,60,136,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── 헤더 ── */
+  header {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+    color: #fff;
+    padding: 28px 20px 22px;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(91,60,136,0.25);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+  header p  { font-size: 0.85rem; opacity: 0.85; }
+
+  /* ── 검색창 ── */
+  .search-wrap {
+    max-width: 680px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+    position: relative;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 14px 48px 14px 18px;
+    border: 2px solid var(--border);
+    border-radius: 32px;
+    font-size: 1rem;
+    outline: none;
+    background: var(--card);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    transition: border-color .2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap .clear-btn {
+    position: absolute;
+    right: 32px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    cursor: pointer; font-size: 1.1rem; color: var(--sub);
+    display: none;
+  }
+  .search-wrap input:not(:placeholder-shown) ~ .clear-btn { display: block; }
+
+  /* ── 필터 탭 ── */
+  .filter-row {
+    max-width: 680px;
+    margin: 12px auto 0;
+    padding: 0 16px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    color: var(--sub);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* ── 결과 수 ── */
+  .result-info {
+    max-width: 680px;
+    margin: 14px auto 6px;
+    padding: 0 18px;
+    font-size: 0.82rem;
+    color: var(--sub);
+  }
+
+  /* ── 목록 ── */
+  .list-wrap {
+    max-width: 680px;
+    margin: 0 auto 100px;
+    padding: 0 12px;
+  }
+  .song-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: background .15s, box-shadow .15s;
+    box-shadow: var(--shadow);
+  }
+  .song-item:hover { background: var(--hover); box-shadow: 0 4px 18px rgba(91,60,136,0.15); }
+  .song-num {
+    min-width: 52px;
+    text-align: center;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 4px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .song-info { flex: 1; min-width: 0; }
+  .song-title {
+    font-size: 0.97rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .song-lyrics-preview {
+    font-size: 0.78rem;
+    color: var(--sub);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .song-arrow { color: var(--accent); font-size: 1.1rem; }
+
+  .no-result {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--sub);
+    font-size: 0.95rem;
+  }
+
+  /* ── 이미지 모달 ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.82);
+    z-index: 500;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 12px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+    max-width: 860px;
+    width: 100%;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .modal-nav {
+    display: flex;
+    gap: 8px;
+  }
+  .modal-nav button, .modal-close {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text);
+    transition: all .15s;
+  }
+  .modal-nav button:hover { background: var(--hover); border-color: var(--accent); color: var(--accent); }
+  .modal-close { color: #999; }
+  .modal-close:hover { background: #fee; border-color: #f00; color: #f00; }
+
+  .modal-img-wrap {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 12px;
+  }
+  .modal-img-wrap img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    display: block;
+  }
+  .modal-loading {
+    padding: 60px;
+    text-align: center;
+    color: var(--sub);
+  }
+  .modal-error {
+    padding: 40px;
+    text-align: center;
+    color: #c00;
+    font-size: 0.9rem;
+  }
+
+  /* ── 로딩 스피너 ── */
+  .spinner {
+    width: 36px; height: 36px;
+    border: 4px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── 설정 배너 (songs.json 없을 때) ── */
+  .setup-banner {
+    max-width: 680px;
+    margin: 16px auto 0;
+    padding: 0 16px;
+  }
+  .setup-banner .banner {
+    background: #fffbe6;
+    border: 1.5px solid #f0c040;
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 0.85rem;
+    color: #5a4a00;
+    line-height: 1.6;
+  }
+  .setup-banner .banner strong { color: #7a3c00; }
+
+  /* ── 스크롤 맨 위 버튼 ── */
+  .top-btn {
+    position: fixed;
+    bottom: 24px; right: 20px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(91,60,136,0.35);
+    display: none;
+    transition: opacity .2s;
+  }
+  .top-btn.show { display: block; }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 1.2rem; }
+    .song-num { min-width: 44px; font-size: 0.82rem; }
+    .modal-img-wrap { padding: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎵 찬미예수 2000 악보 검색</h1>
+  <p>악보를 번호, 제목, 가사로 빠르게 찾아보세요</p>
+</header>
+
+<div class="search-wrap">
+  <input type="search" id="searchInput" placeholder="번호·제목·가사로 검색..." autocomplete="off">
+  <button class="clear-btn" onclick="clearSearch()">✕</button>
+</div>
+
+<div class="filter-row">
+  <button class="filter-btn active" onclick="setFilter('all', this)">전체</button>
+  <button class="filter-btn" onclick="setFilter('number', this)">번호</button>
+  <button class="filter-btn" onclick="setFilter('title', this)">제목</button>
+  <button class="filter-btn" onclick="setFilter('lyrics', this)">가사</button>
+</div>
+
+<div class="setup-banner" id="setupBanner" style="display:none">
+  <div class="banner">
+    ⚙ <strong>prepare.py를 아직 실행하지 않으셨나요?</strong><br>
+    현재 번호만으로 표시됩니다. 제목·가사 검색을 위해 먼저 <code>python prepare.py</code>를 실행해 songs.json과 images/ 폴더를 생성하세요.
+  </div>
+</div>
+
+<div class="result-info" id="resultInfo"></div>
+
+<div class="list-wrap" id="songList"></div>
+
+<!-- 이미지 모달 -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">악보 보기</span>
+      <div class="modal-nav">
+        <button onclick="navigate(-1)">◀ 이전</button>
+        <button onclick="navigate(1)">다음 ▶</button>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕ 닫기</button>
+    </div>
+    <div class="modal-img-wrap" id="modalImgWrap">
+      <div class="modal-loading">
+        <div class="spinner"></div>
+        악보를 불러오는 중...
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="top-btn" id="topBtn" onclick="scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// ── 상태 ──────────────────────────────────────────────────────────────────
+let allSongs = [];
+let filtered = [];
+let currentFilter = 'all';
+let currentIndex = 0; // 현재 모달에서 보는 filtered 인덱스
+
+// ── 초기화 ────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch('songs.json');
+    if (!res.ok) throw new Error('not found');
+    allSongs = await res.json();
+    document.getElementById('setupBanner').style.display = 'none';
+  } catch {
+    // songs.json 없으면 번호만으로 임시 목록 생성 (1889~2062)
+    document.getElementById('setupBanner').style.display = 'block';
+    allSongs = [];
+    for (let i = 1889; i <= 2062; i++) {
+      allSongs.push({ number: i, title: `곡 ${i}`, lyrics: '' });
+    }
+  }
+  render(allSongs);
+}
+
+// ── 검색 ──────────────────────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', debounce(onSearch, 200));
+
+function onSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) { render(allSongs); return; }
+
+  filtered = allSongs.filter(s => {
+    if (currentFilter === 'number') return String(s.number).includes(q);
+    if (currentFilter === 'title')  return s.title.toLowerCase().includes(q);
+    if (currentFilter === 'lyrics') return s.lyrics.toLowerCase().includes(q);
+    // all
+    return String(s.number).includes(q)
+        || s.title.toLowerCase().includes(q)
+        || s.lyrics.toLowerCase().includes(q);
+  });
+  render(filtered);
+}
+
+function setFilter(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  onSearch();
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  render(allSongs);
+}
+
+// ── 렌더링 ────────────────────────────────────────────────────────────────
+function render(songs) {
+  filtered = songs;
+  const list = document.getElementById('songList');
+  const info = document.getElementById('resultInfo');
+
+  info.textContent = `총 ${songs.length}곡`;
+
+  if (songs.length === 0) {
+    list.innerHTML = '<div class="no-result">검색 결과가 없습니다 🎵</div>';
+    return;
+  }
+
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+
+  list.innerHTML = songs.map((s, idx) => {
+    const numHl  = highlight(String(s.number), q);
+    const titleHl = highlight(s.title, q);
+    const lyricsHl = s.lyrics
+      ? `<div class="song-lyrics-preview">${highlight(truncate(s.lyrics, 60), q)}</div>`
+      : '';
+    return `<div class="song-item" onclick="openModal(${idx})">
+      <div class="song-num">${numHl}</div>
+      <div class="song-info">
+        <div class="song-title">${titleHl}</div>
+        ${lyricsHl}
+      </div>
+      <span class="song-arrow">›</span>
+    </div>`;
+  }).join('');
+}
+
+function highlight(text, q) {
+  if (!q) return text;
+  const safe = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp(safe, 'gi'), m => `<mark style="background:#f0e0ff;border-radius:2px">${m}</mark>`);
+}
+
+function truncate(str, n) {
+  return str.length > n ? str.slice(0, n) + '…' : str;
+}
+
+// ── 모달 ──────────────────────────────────────────────────────────────────
+function openModal(idx) {
+  currentIndex = idx;
+  showSong(filtered[idx]);
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function showSong(song) {
+  document.getElementById('modalTitle').textContent = `#${song.number}  ${song.title}`;
+  const wrap = document.getElementById('modalImgWrap');
+  wrap.innerHTML = '<div class="modal-loading"><div class="spinner"></div>악보를 불러오는 중...</div>';
+
+  // PNG → BMP 순서로 시도
+  const candidates = [
+    `images/${song.number}.png`,
+    `images/(${song.number}).png`,
+    `images/(${song.number}).bmp`,
+    `images/${song.number}.bmp`,
+  ];
+  let tried = 0;
+  const img = new Image();
+  const tryNext = () => {
+    if (tried >= candidates.length) {
+      wrap.innerHTML = `<div class="modal-error">
+        이미지를 불러올 수 없습니다.<br>
+        <small>images/ 폴더에 악보 이미지가 있는지 확인하세요.<br>
+        지원 파일명: ${song.number}.png 또는 (${song.number}).bmp</small>
+      </div>`;
+      return;
+    }
+    img.src = candidates[tried++];
+  };
+  img.onload = () => { wrap.innerHTML = ''; wrap.appendChild(img); };
+  img.onerror = tryNext;
+  img.style.cssText = 'max-width:100%;height:auto;border-radius:4px;';
+  tryNext();
+  img.style.cssText = 'max-width:100%;height:auto;border-radius:4px;';
+}
+
+function navigate(dir) {
+  const next = currentIndex + dir;
+  if (next < 0 || next >= filtered.length) return;
+  currentIndex = next;
+  showSong(filtered[currentIndex]);
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal')) return;
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Esc로 닫기, 화살표 키로 이동
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('modal').classList.contains('open')) return;
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowLeft')  navigate(-1);
+  if (e.key === 'ArrowRight') navigate(1);
+});
+
+// ── 스크롤 맨 위 버튼 ─────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('topBtn').classList.toggle('show', window.scrollY > 400);
+});
+
+// ── 유틸 ──────────────────────────────────────────────────────────────────
+function debounce(fn, ms) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+
+init();
+</script>
+</body>
+</html>
