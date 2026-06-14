@@ -66,77 +66,91 @@
   /* ── 모달 ── */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.82); z-index: 500;
+    background: rgba(0,0,0,0.85); z-index: 500;
     justify-content: center; align-items: center;
-    flex-direction: column; padding: 12px;
+    padding: 16px;
   }
   .modal-overlay.open { display: flex; }
+
   .modal-box {
     background: var(--card); border-radius: 16px; overflow: hidden;
-    max-width: 860px; width: 100%; max-height: 92vh;
+    width: min(1100px, 96vw);
+    height: min(90vh, 800px);
     display: flex; flex-direction: column;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
   }
+
+  /* 헤더 */
   .modal-header {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 20px; border-bottom: 1px solid var(--border); gap: 12px;
-    flex-shrink: 0;
+    padding: 12px 18px; border-bottom: 1px solid var(--border);
+    flex-shrink: 0; gap: 12px; background: var(--card);
   }
-  .modal-title { font-size: 1rem; font-weight: 700; color: var(--accent); flex: 1; min-width: 0; }
+  .modal-title { font-size: 1rem; font-weight: 700; color: var(--accent); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .modal-nav { display: flex; gap: 8px; flex-shrink: 0; }
   .modal-nav button, .modal-close {
     background: none; border: 1.5px solid var(--border); border-radius: 8px;
-    padding: 6px 12px; cursor: pointer; font-size: 0.9rem; color: var(--text); transition: all .15s;
+    padding: 5px 12px; cursor: pointer; font-size: 0.85rem; color: var(--text); transition: all .15s;
   }
   .modal-nav button:hover { background: var(--hover); border-color: var(--accent); color: var(--accent); }
   .modal-close { color: #999; flex-shrink: 0; }
   .modal-close:hover { background: #fee; border-color: #f00; color: #f00; }
 
-  /* ── 탭 ── */
-  .modal-tabs {
-    display: flex; border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+  /* 본문 — 좌우 분할 */
+  .modal-body {
+    display: flex; flex: 1; overflow: hidden;
   }
-  .tab-btn {
-    flex: 1; padding: 10px; border: none; background: none;
-    font-size: 0.92rem; cursor: pointer; color: var(--sub);
-    border-bottom: 3px solid transparent; transition: all .15s;
-    font-weight: 500;
-  }
-  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--hover); }
 
-  /* ── 악보 탭 ── */
-  .modal-img-wrap {
-    flex: 1; overflow-y: auto; overflow-x: hidden;
-    background: #f0f0f0; display: flex;
-    justify-content: center; align-items: flex-start; padding: 12px;
+  /* 왼쪽: 악보 */
+  .modal-score {
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #eee; overflow: hidden; position: relative;
   }
-  .modal-img-wrap img { max-width: 100%; height: auto; border-radius: 4px; display: block; }
-  .modal-loading { padding: 60px; text-align: center; color: var(--sub); }
-  .modal-error { padding: 40px; text-align: center; color: #c00; font-size: 0.9rem; }
-
-  /* ── 가사 탭 ── */
-  .modal-lyrics-wrap {
-    flex: 1; overflow-y: auto; padding: 24px 28px;
-    display: none; line-height: 1.9; font-size: 1rem;
+  .modal-score img {
+    max-width: 100%; max-height: 100%;
+    width: auto; height: auto;
+    object-fit: contain; display: block;
+    border-radius: 4px;
   }
-  .modal-lyrics-wrap.active { display: block; }
-  .modal-img-wrap.hidden { display: none; }
+  .modal-loading {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: var(--sub); gap: 10px; font-size: 0.9rem;
+  }
+  .modal-error { padding: 30px; text-align: center; color: #c00; font-size: 0.9rem; }
 
+  /* 구분선 */
+  .modal-divider {
+    width: 1px; background: var(--border); flex-shrink: 0;
+  }
+
+  /* 오른쪽: 가사 */
+  .modal-lyrics {
+    width: 300px; flex-shrink: 0;
+    overflow-y: auto; padding: 20px 18px;
+    background: var(--card);
+  }
+  .modal-lyrics h3 {
+    font-size: 0.78rem; font-weight: 700; color: var(--accent);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 14px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
   .lyrics-verse {
-    margin-bottom: 20px;
-    padding: 14px 18px;
+    margin-bottom: 16px;
+    padding: 12px 14px;
     background: var(--hover);
     border-left: 3px solid var(--accent);
     border-radius: 0 8px 8px 0;
+    font-size: 0.88rem;
+    line-height: 1.9;
+    color: var(--text);
   }
   .lyrics-verse:last-child { margin-bottom: 0; }
-  .lyrics-line { color: var(--text); }
-  .lyrics-break { height: 6px; }
+  .lyrics-break { height: 4px; }
+  .no-lyrics { text-align: center; padding: 40px 10px; color: var(--sub); font-size: 0.85rem; }
 
-  .no-lyrics { text-align: center; padding: 60px; color: var(--sub); font-size: 0.9rem; }
-
-  .spinner { width: 36px; height: 36px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
+  .spinner { width: 32px; height: 32px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .top-btn {
@@ -149,11 +163,13 @@
   }
   .top-btn.show { display: block; }
 
-  @media (max-width: 480px) {
-    header h1 { font-size: 1.2rem; }
-    .song-num { min-width: 44px; font-size: 0.82rem; }
-    .modal-img-wrap { padding: 6px; }
-    .modal-lyrics-wrap { padding: 16px; }
+  /* 모바일: 위아래로 전환 */
+  @media (max-width: 600px) {
+    .modal-box { width: 98vw; height: 92vh; }
+    .modal-body { flex-direction: column; }
+    .modal-score { flex: 0 0 55%; }
+    .modal-divider { width: 100%; height: 1px; }
+    .modal-lyrics { width: 100%; flex: 1; }
   }
 </style>
 </head>
@@ -179,7 +195,7 @@
 <div class="result-info" id="resultInfo"></div>
 <div class="list-wrap" id="songList"></div>
 
-<!-- 모달 -->
+<!-- 모달: 악보(좌) + 가사(우) -->
 <div class="modal-overlay" id="modal" onclick="closeModal(event)">
   <div class="modal-box">
     <div class="modal-header">
@@ -191,19 +207,21 @@
       <button class="modal-close" onclick="closeModal()">✕ 닫기</button>
     </div>
 
-    <!-- 탭 -->
-    <div class="modal-tabs">
-      <button class="tab-btn active" id="tabScore" onclick="switchTab('score')">🎼 악보</button>
-      <button class="tab-btn" id="tabLyrics" onclick="switchTab('lyrics')">📝 가사</button>
-    </div>
+    <div class="modal-body">
+      <!-- 왼쪽: 악보 -->
+      <div class="modal-score" id="modalScore">
+        <div class="modal-loading"><div class="spinner"></div>불러오는 중...</div>
+      </div>
 
-    <!-- 악보 -->
-    <div class="modal-img-wrap" id="modalImgWrap">
-      <div class="modal-loading"><div class="spinner"></div>악보를 불러오는 중...</div>
-    </div>
+      <!-- 구분선 -->
+      <div class="modal-divider"></div>
 
-    <!-- 가사 -->
-    <div class="modal-lyrics-wrap" id="modalLyricsWrap"></div>
+      <!-- 오른쪽: 가사 -->
+      <div class="modal-lyrics" id="modalLyrics">
+        <h3>📝 가사</h3>
+        <div id="lyricsContent"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -211,7 +229,6 @@
 
 <script>
 let allSongs = [], filtered = [], currentFilter = 'all', currentIndex = 0;
-let currentTab = 'score';
 
 async function init() {
   try {
@@ -290,78 +307,63 @@ function showSong(song) {
 }
 
 function loadScore(song) {
-  const wrap = document.getElementById('modalImgWrap');
-  wrap.innerHTML = '<div class="modal-loading"><div class="spinner"></div>악보를 불러오는 중...</div>';
+  const wrap = document.getElementById('modalScore');
+  wrap.innerHTML = '<div class="modal-loading"><div class="spinner"></div>악보 로딩 중...</div>';
+
   const candidates = [`images/${song.number}.png`, `images/(${song.number}).png`];
   let tried = 0;
   const img = new Image();
-  img.style.cssText = 'max-width:100%;height:auto;border-radius:4px;';
+
   const tryNext = () => {
     if (tried >= candidates.length) {
-      wrap.innerHTML = `<div class="modal-error">이미지를 불러올 수 없습니다.<br><small>지원 파일명: ${song.number}.png</small></div>`;
+      wrap.innerHTML = `<div class="modal-error">이미지를 불러올 수 없습니다.<br><small>${song.number}.png</small></div>`;
       return;
     }
     img.src = candidates[tried++];
   };
+
   img.onload = () => { wrap.innerHTML = ''; wrap.appendChild(img); };
   img.onerror = tryNext;
   tryNext();
 }
 
 function loadLyrics(song) {
-  const wrap = document.getElementById('modalLyricsWrap');
+  const content = document.getElementById('lyricsContent');
   const raw = song.lyrics_full || song.lyrics || '';
   if (!raw.trim()) {
-    wrap.innerHTML = '<div class="no-lyrics">가사 정보가 없습니다.</div>';
+    content.innerHTML = '<div class="no-lyrics">가사 정보가 없습니다.</div>';
     return;
   }
 
-  // 파싱: // = 절 구분, / = 줄 내 구분
+  // // = 절 구분, / = 줄 내 구분
   const lines = raw.split('\n').map(l => l.trim());
   const verses = [];
-  let current = [];
+  let cur = [];
 
   for (const line of lines) {
     if (line === '//') {
-      if (current.length) { verses.push(current); current = []; }
+      if (cur.length) { verses.push(cur); cur = []; }
     } else if (line === '/') {
-      current.push(null); // 줄바꿈
+      cur.push(null);
     } else if (line) {
-      current.push(line);
+      cur.push(line);
     }
   }
-  if (current.length) verses.push(current);
+  if (cur.length) verses.push(cur);
 
   if (!verses.length) {
-    wrap.innerHTML = '<div class="no-lyrics">가사 정보가 없습니다.</div>';
+    content.innerHTML = '<div class="no-lyrics">가사 정보가 없습니다.</div>';
     return;
   }
 
-  wrap.innerHTML = verses.map(verse =>
+  content.innerHTML = verses.map(verse =>
     `<div class="lyrics-verse">${verse.map(l =>
-      l === null ? '<div class="lyrics-break"></div>' : `<div class="lyrics-line">${l}</div>`
+      l === null ? '<div class="lyrics-break"></div>' : `<div>${l}</div>`
     ).join('')}</div>`
   ).join('');
-}
 
-function switchTab(tab) {
-  currentTab = tab;
-  const imgWrap = document.getElementById('modalImgWrap');
-  const lyricWrap = document.getElementById('modalLyricsWrap');
-  const tabScore = document.getElementById('tabScore');
-  const tabLyrics = document.getElementById('tabLyrics');
-
-  if (tab === 'score') {
-    imgWrap.classList.remove('hidden');
-    lyricWrap.classList.remove('active');
-    tabScore.classList.add('active');
-    tabLyrics.classList.remove('active');
-  } else {
-    imgWrap.classList.add('hidden');
-    lyricWrap.classList.add('active');
-    tabScore.classList.remove('active');
-    tabLyrics.classList.add('active');
-  }
+  // 가사 스크롤 맨 위로
+  document.getElementById('modalLyrics').scrollTop = 0;
 }
 
 function navigate(dir) {
@@ -375,8 +377,6 @@ function closeModal(e) {
   if (e && e.target !== document.getElementById('modal')) return;
   document.getElementById('modal').classList.remove('open');
   document.body.style.overflow = '';
-  // 탭 악보로 리셋
-  switchTab('score');
 }
 
 document.addEventListener('keydown', e => {
