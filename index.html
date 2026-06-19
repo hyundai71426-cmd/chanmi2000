@@ -326,24 +326,32 @@ function openModal(idx) {
   loadCoupangAd();
 }
 
-let coupangScriptLoaded = false;
 function loadCoupangAd() {
   const box = document.getElementById('coupangAd');
   box.innerHTML = '';
-  const renderAd = () => {
-    box.innerHTML = '';
-    new PartnersCoupang.G({"id":723129,"template":"carousel","trackingCode":"AF0611178","width":"680","height":"140","tsource":""});
-  };
-  if (window.PartnersCoupang) {
-    renderAd();
-    return;
-  }
-  if (coupangScriptLoaded) return;
-  coupangScriptLoaded = true;
-  const script = document.createElement('script');
-  script.src = 'https://ads-partners.coupang.com/g.js';
-  script.onload = renderAd;
-  document.body.appendChild(script);
+
+  // 쿠팡 광고 스크립트는 document.write로 즉시 렌더링하므로
+  // 별도 iframe 문서 안에서 열어줘야 동작합니다.
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'width:680px;max-width:100%;height:140px;border:0;overflow:hidden;';
+  iframe.scrolling = 'no';
+  iframe.frameBorder = '0';
+  box.appendChild(iframe);
+
+  const doc = iframe.contentWindow.document;
+  doc.open();
+  doc.write(`
+    <!DOCTYPE html>
+    <html><head><meta charset="utf-8">
+    <style>body{margin:0;padding:0;overflow:hidden;}</style>
+    </head><body>
+    <script src="https://ads-partners.coupang.com/g.js"></script>
+    <script>
+      new PartnersCoupang.G({"id":723129,"template":"carousel","trackingCode":"AF0611178","width":"680","height":"140","tsource":""});
+    </script>
+    </body></html>
+  `);
+  doc.close();
 }
 
 function showSong(song) {
