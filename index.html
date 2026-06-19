@@ -340,17 +340,15 @@ function loadCoupangAd() {
 
   const doc = iframe.contentWindow.document;
   doc.open();
-  doc.write(`
-    <!DOCTYPE html>
-    <html><head><meta charset="utf-8">
-    <style>body{margin:0;padding:0;overflow:hidden;}</style>
-    </head><body>
-    <script src="https://ads-partners.coupang.com/g.js"></script>
-    <script>
-      new PartnersCoupang.G({"id":723129,"template":"carousel","trackingCode":"AF0611178","width":"680","height":"140","tsource":""});
-    </script>
-    </body></html>
-  `);
+  const adHtml = [
+    '<!DOCTYPE html><html><head><meta charset="utf-8">',
+    '<style>body{margin:0;padding:0;overflow:hidden;}</' + 'style>',
+    '</head><body>',
+    '<script src="https://ads-partners.coupang.com/g.js"><' + '/script>',
+    '<script>new PartnersCoupang.G({"id":723129,"template":"carousel","trackingCode":"AF0611178","width":"680","height":"140","tsource":""});<' + '/script>',
+    '</body></html>'
+  ].join('');
+  doc.write(adHtml);
   doc.close();
 }
 
