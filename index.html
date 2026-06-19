@@ -163,6 +163,26 @@
   }
   .top-btn.show { display: block; }
 
+  /* 쿠팡파트너스 광고 */
+  .modal-ad {
+    flex-shrink: 0;
+    padding: 10px 14px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--card);
+    text-align: center;
+  }
+  .modal-ad-disclosure {
+    font-size: 0.68rem;
+    color: var(--sub);
+    margin-bottom: 6px;
+  }
+  .modal-ad-box {
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+
   /* 모바일: 위아래로 전환 */
   @media (max-width: 600px) {
     .modal-box { width: 98vw; height: 92vh; }
@@ -221,6 +241,11 @@
         <h3>📝 가사</h3>
         <div id="lyricsContent"></div>
       </div>
+    </div>
+
+    <div class="modal-ad">
+      <div class="modal-ad-disclosure">이 포스팅은 쿠팡파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+      <div class="modal-ad-box" id="coupangAd"></div>
     </div>
   </div>
 </div>
@@ -298,6 +323,27 @@ function openModal(idx) {
   showSong(filtered[idx]);
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  loadCoupangAd();
+}
+
+let coupangScriptLoaded = false;
+function loadCoupangAd() {
+  const box = document.getElementById('coupangAd');
+  box.innerHTML = '';
+  const renderAd = () => {
+    box.innerHTML = '';
+    new PartnersCoupang.G({"id":723129,"template":"carousel","trackingCode":"AF0611178","width":"680","height":"140","tsource":""});
+  };
+  if (window.PartnersCoupang) {
+    renderAd();
+    return;
+  }
+  if (coupangScriptLoaded) return;
+  coupangScriptLoaded = true;
+  const script = document.createElement('script');
+  script.src = 'https://ads-partners.coupang.com/g.js';
+  script.onload = renderAd;
+  document.body.appendChild(script);
 }
 
 function showSong(song) {
